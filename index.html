@@ -1,112 +1,402 @@
 <!DOCTYPE html>
 <html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Quản Lý Học Sinh</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            color: #333;
-            margin: 0;
-            padding: 20px;
-        }
-        h1 {
-            color: #4CAF50;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #4CAF50;
-            color: white;
-        }
-        button {
-            padding: 10px 15px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        form {
-            margin-top: 20px;
-        }
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        color: #333;
+        margin: 0;
+        padding: 20px;
+      }
+      h1 {
+        color: #4caf50;
+        text-align: center;
+      }
+      button {
+        padding: 10px 15px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin: 5px;
+        font-size: 16px;
+      }
+      button:hover {
+        background-color: #45a049;
+      }
+      .hidden {
+        display: none;
+      }
+      form {
+        margin-top: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      input[type="text"],
+      input[type="file"] {
+        padding: 10px;
+        margin: 5px;
+        width: 80%;
+        max-width: 300px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+      .date-inputs {
+        display: flex;
+        justify-content: center;
+        margin: 5px 0;
+      }
+      .date-inputs input {
+        width: 60px;
+        margin: 0 5px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+      }
+      th {
+        background-color: #4caf50;
+        color: white;
+      }
+      #attendanceResult {
+        margin-top: 20px;
+        font-weight: bold;
+        color: #d9534f; /* Red color for alerts */
+      }
+      .notification {
+        margin-top: 20px;
+        color: #4caf50; /* Green color for success messages */
+        font-weight: bold;
+        text-align: center;
+      }
+      .nav-buttons {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <h1>Quản Lý Học Sinh</h1>
-    <form id="studentForm">
-        <input type="text" id="name" placeholder="Tên Học Sinh" required>
-        <input type="number" id="age" placeholder="Tuổi" required>
-        <input type="text" id="class" placeholder="Lớp Học" required>
-        <select id="classification" required>
-            <option value="">Chọn Phân Loại</option>
-            <option value="Giỏi">Giỏi</option>
-            <option value="Khá">Khá</option>
-            <option value="Trung Bình">Trung Bình</option>
-            <option value="Yếu">Yếu</option>
-        </select>
-        <button type="submit">Thêm Học Sinh</button>
-    </form>
 
-    <table id="studentTable">
-        <thead>
+    <div id="mainButtons" class="nav-buttons">
+      <button onclick="showSection('studentInput')">
+        Nhập Thông Tin Học Sinh
+      </button>
+      <button onclick="showSection('studentManagement')">
+        Quản Lý Học Sinh
+      </button>
+      <button onclick="showSection('contactTeachers')">
+        Liên Hệ Giáo Viên
+      </button>
+    </div>
+
+    <div id="studentInput" class="hidden">
+      <h2>Nhập Thông Tin Học Sinh</h2>
+      <form id="studentForm">
+        <input type="text" id="name" placeholder="Tên Học Sinh" required />
+        <input type="text" id="class" placeholder="Lớp Học" required />
+        <button type="submit">Thêm Học Sinh</button>
+      </form>
+      <h2>Nhập Danh Sách Học Sinh Từ File</h2>
+      <input type="file" id="fileInput" accept=".txt" />
+      <button id="uploadButton">Tải Lên</button>
+      <div id="uploadNotification" class="notification hidden"></div>
+      <button onclick="showMain()">Quay Lại</button>
+    </div>
+
+    <div id="studentManagement" class="hidden">
+      <h2>Quản Lý Học Sinh</h2>
+      <div class="nav-buttons">
+        <button onclick="showClass('Toán')">Toán</button>
+        <button onclick="showClass('Văn')">Văn</button>
+        <button onclick="showClass('Anh')">Anh</button>
+      </div>
+
+      <div id="classInfo" class="hidden">
+        <h3>Thông Tin Học Sinh Lớp: <span id="className"></span></h3>
+        <table id="classStudentTable">
+          <thead>
             <tr>
-                <th>Tên</th>
-                <th>Tuổi</th>
-                <th>Lớp Học</th>
-                <th>Phân Loại</th>
-                <th>Hành Động</th>
+              <th>Mã Học Sinh</th>
+              <th>Tên</th>
+              <th>Lớp Học</th>
+              <th>Trạng Thái Điểm Danh</th>
             </tr>
-        </thead>
-        <tbody>
-            <!-- Danh sách học sinh sẽ được thêm vào đây -->
-        </tbody>
-    </table>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <h2>Điểm Danh Học Sinh</h2>
+        <div class="date-inputs">
+          <input type="text" id="attendanceDay" placeholder="Ngày" required />
+          <input
+            type="text"
+            id="attendanceMonth"
+            placeholder="Tháng"
+            required
+          />
+          <input type="text" id="attendanceYear" placeholder="Năm" required />
+        </div>
+        <input
+          type="text"
+          id="studentIds"
+          placeholder="Mã Học Sinh (ngăn cách bằng dấu cách)"
+          required
+        />
+        <button id="attendanceButton">Điểm Danh</button>
+        <button onclick="showSection('studentManagement')">Quay Lại</button>
+        <div id="attendanceResult"></div>
+        <button id="searchAttendanceButton">Tìm Kiếm Điểm Danh</button>
+        <div id="searchSection" class="hidden">
+          <h3>Tìm Kiếm Theo Ngày</h3>
+          <div class="date-inputs">
+            <input type="text" id="searchDay" placeholder="Ngày" required />
+            <input type="text" id="searchMonth" placeholder="Tháng" required />
+            <input type="text" id="searchYear" placeholder="Năm" required />
+          </div>
+          <button id="performSearchButton">Tìm Kiếm</button>
+        </div>
+        <div id="searchResult"></div>
+      </div>
+    </div>
+
+    <div id="contactTeachers" class="hidden">
+      <h2>Liên Hệ Giáo Viên</h2>
+      <ul>
+        <li>
+          <strong>Giáo viên Toán</strong>: 0123 456 789 -
+          <a href="mailto:toan@example.com">toan@example.com</a>
+        </li>
+        <li>
+          <strong>Giáo viên Văn</strong>: 0987 654 321 -
+          <a href="mailto:van@example.com">van@example.com</a>
+        </li>
+        <li>
+          <strong>Giáo viên Anh</strong>: 0912 345 678 -
+          <a href="mailto:anh@example.com">anh@example.com</a>
+        </li>
+      </ul>
+      <button onclick="showMain()">Quay Lại</button>
+    </div>
 
     <script>
-        document.getElementById('studentForm').addEventListener('submit', function(event) {
-            event.preventDefault();
+      let studentIdCounter = 1;
+      const students = [];
+      const attendanceRecords = {}; // Lưu trữ điểm danh theo ngày
 
-            const name = document.getElementById('name').value;
-            const age = document.getElementById('age').value;
-            const className = document.getElementById('class').value;
-            const classification = document.getElementById('classification').value;
+      function showMain() {
+        document.querySelectorAll("div").forEach((div) => {
+          div.classList.add("hidden");
+        });
+        document.getElementById("mainButtons").classList.remove("hidden");
+      }
 
-            const table = document.getElementById('studentTable').getElementsByTagName('tbody')[0];
-            const newRow = table.insertRow();
+      function showSection(sectionId) {
+        document.querySelectorAll("div").forEach((div) => {
+          if (div.id !== sectionId && div.id !== "mainButtons") {
+            div.classList.add("hidden");
+          } else {
+            div.classList.remove("hidden");
+          }
+        });
+        document.getElementById("classInfo").classList.add("hidden");
+        document.getElementById("searchSection").classList.add("hidden"); // Ẩn phần tìm kiếm
+        if (sectionId === "studentManagement") {
+          displayStudentList();
+        }
+      }
 
-            const nameCell = newRow.insertCell(0);
-            const ageCell = newRow.insertCell(1);
-            const classCell = newRow.insertCell(2);
-            const classificationCell = newRow.insertCell(3);
-            const actionCell = newRow.insertCell(4);
+      document
+        .getElementById("studentForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
 
-            nameCell.textContent = name;
-            ageCell.textContent = age;
-            classCell.textContent = className;
-            classificationCell.textContent = classification;
-            actionCell.innerHTML = '<button onclick="deleteRow(this)">Xóa</button>';
+          const name = document.getElementById("name").value;
+          const className = document.getElementById("class").value;
 
-            document.getElementById('studentForm').reset();
+          const student = {
+            id: studentIdCounter++,
+            name: name,
+            class: className,
+          };
+          students.push(student);
+
+          document.getElementById("studentForm").reset();
         });
 
-        function deleteRow(button) {
-            const row = button.parentNode.parentNode;
-            row.parentNode.removeChild(row);
-        }
+      document
+        .getElementById("uploadButton")
+        .addEventListener("click", function () {
+          const fileInput = document.getElementById("fileInput");
+          const file = fileInput.files[0];
+
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+              const lines = e.target.result.split("\n");
+              lines.forEach((line) => {
+                const [id, name, className] = line.split(",");
+                if (id && name && className) {
+                  const student = {
+                    id: parseInt(id.trim()),
+                    name: name.trim(),
+                    class: className.trim(),
+                  };
+                  students.push(student);
+                }
+              });
+              document.getElementById("uploadNotification").textContent =
+                "Đã tải lên thành công";
+              document
+                .getElementById("uploadNotification")
+                .classList.remove("hidden");
+            };
+            reader.readAsText(file);
+          }
+        });
+
+      function displayStudentList() {
+        const tableBody = document
+          .getElementById("classStudentTable")
+          .getElementsByTagName("tbody")[0];
+        tableBody.innerHTML = ""; // Xóa dữ liệu cũ
+
+        students.forEach((student) => {
+          const newRow = tableBody.insertRow();
+          newRow.insertCell(0).textContent = student.id;
+          newRow.insertCell(1).textContent = student.name;
+          newRow.insertCell(2).textContent = student.class;
+          newRow.insertCell(3).textContent = "Chưa điểm danh"; // Trạng thái ban đầu
+        });
+      }
+
+      function showClass(className) {
+        const classStudents = students.filter(
+          (student) => student.class === className
+        );
+        document.getElementById("className").textContent = className;
+
+        const tableBody = document
+          .getElementById("classStudentTable")
+          .getElementsByTagName("tbody")[0];
+        tableBody.innerHTML = ""; // Xóa dữ liệu cũ
+
+        classStudents.forEach((student) => {
+          const newRow = tableBody.insertRow();
+          newRow.insertCell(0).textContent = student.id;
+          newRow.insertCell(1).textContent = student.name;
+          newRow.insertCell(2).textContent = student.class;
+          newRow.insertCell(3).textContent = "Chưa điểm danh"; // Trạng thái ban đầu
+        });
+
+        document.getElementById("classInfo").classList.remove("hidden");
+        document.getElementById("searchSection").classList.remove("hidden"); // Hiện phần tìm kiếm
+      }
+
+      document
+        .getElementById("attendanceButton")
+        .addEventListener("click", function (event) {
+          event.preventDefault();
+
+          const day = document.getElementById("attendanceDay").value;
+          const month = document.getElementById("attendanceMonth").value;
+          const year = document.getElementById("attendanceYear").value;
+          const dateKey = `${day}/${month}/${year}`;
+          const ids = document
+            .getElementById("studentIds")
+            .value.split(" ")
+            .map((id) => id.trim());
+          attendanceRecords[dateKey] = [];
+
+          ids.forEach((id) => {
+            const student = students.find((s) => s.id === parseInt(id));
+            if (student) {
+              attendanceRecords[dateKey].push(student.id);
+            }
+          });
+
+          updateAttendanceStatus();
+
+          const attendanceResult = document.getElementById("attendanceResult");
+          attendanceResult.innerHTML = `<strong>Điểm danh thành công cho ngày ${dateKey}:</strong><br>`;
+          attendanceResult.innerHTML += `<strong>Tổng số học sinh được điểm danh: ${attendanceRecords[dateKey].length}</strong>`;
+        });
+
+      function updateAttendanceStatus() {
+        const tableBody = document
+          .getElementById("classStudentTable")
+          .getElementsByTagName("tbody")[0];
+        const rows = tableBody.getElementsByTagName("tr");
+
+        Array.from(rows).forEach((row) => {
+          const studentId = parseInt(row.cells[0].textContent);
+          const attendanceStatus =
+            attendanceRecords[
+              `${document.getElementById("attendanceDay").value}/${
+                document.getElementById("attendanceMonth").value
+              }/${document.getElementById("attendanceYear").value}`
+            ] || [];
+
+          if (attendanceStatus.includes(studentId)) {
+            row.cells[3].textContent = "Đi học";
+          } else {
+            row.cells[3].textContent = "Vắng mặt";
+          }
+        });
+      }
+
+      document
+        .getElementById("searchAttendanceButton")
+        .addEventListener("click", function () {
+          document.getElementById("searchSection").classList.toggle("hidden");
+        });
+
+      document
+        .getElementById("performSearchButton")
+        .addEventListener("click", function () {
+          const day = document.getElementById("searchDay").value;
+          const month = document.getElementById("searchMonth").value;
+          const year = document.getElementById("searchYear").value;
+          const dateKey = `${day}/${month}/${year}`;
+
+          const studentsAttendance = students.map((student) => {
+            return {
+              id: student.id,
+              name: student.name,
+              class: student.class,
+              status: attendanceRecords[dateKey]?.includes(student.id)
+                ? "Đi học"
+                : "Vắng mặt",
+            };
+          });
+
+          const searchResult = document.getElementById("searchResult");
+          searchResult.innerHTML = `<h3>Kết quả điểm danh cho ngày ${dateKey}:</h3>`;
+          const resultsTable = document.createElement("table");
+          const resultsHeader = `<tr><th>Mã Học Sinh</th><th>Tên</th><th>Lớp Học</th><th>Trạng Thái</th></tr>`;
+          resultsTable.innerHTML = resultsHeader;
+
+          studentsAttendance.forEach((student) => {
+            const row = `<tr><td>${student.id}</td><td>${student.name}</td><td>${student.class}</td><td>${student.status}</td></tr>`;
+            resultsTable.innerHTML += row;
+          });
+
+          searchResult.innerHTML = "";
+          searchResult.appendChild(resultsTable);
+        });
     </script>
-</body>
+  </body>
 </html>
