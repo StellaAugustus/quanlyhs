@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quản Lý Học Sinh</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        color: #333;
+        margin: 0;
+        padding: 20px;
+      }
+      h1 {
+        color: #4caf50;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+      }
+      th {
+        background-color: #4caf50;
+        color: white;
+      }
+      button {
+        padding: 10px 15px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #45a049;
+      }
+      form {
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Quản Lý Học Sinh</h1>
+    <form id="studentForm">
+      <input type="text" id="name" placeholder="Tên Học Sinh" required />
+      <input type="number" id="age" placeholder="Tuổi" required />
+      <button type="submit">Thêm Học Sinh</button>
+    </form>
+
+    <table id="studentTable">
+      <thead>
+        <tr>
+          <th>Tên</th>
+          <th>Tuổi</th>
+          <th>Hành Động</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Danh sách học sinh sẽ được thêm vào đây -->
+      </tbody>
+    </table>
+
+    <script>
+      document
+        .getElementById("studentForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          const name = document.getElementById("name").value;
+          const age = document.getElementById("age").value;
+
+          const table = document
+            .getElementById("studentTable")
+            .getElementsByTagName("tbody")[0];
+          const newRow = table.insertRow();
+
+          const nameCell = newRow.insertCell(0);
+          const ageCell = newRow.insertCell(1);
+          const actionCell = newRow.insertCell(2);
+
+          nameCell.textContent = name;
+          ageCell.textContent = age;
+          actionCell.innerHTML =
+            '<button onclick="deleteRow(this)">Xóa</button>';
+
+          document.getElementById("studentForm").reset();
+        });
+
+      function deleteRow(button) {
+        const row = button.parentNode.parentNode;
+        row.parentNode.removeChild(row);
+      }
+    </script>
+  </body>
+</html>
