@@ -1,46 +1,409 @@
-name: Azure Static Web Apps CI/CD
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quản Lý Học Sinh</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        color: #333;
+        margin: 0;
+        padding: 20px;
+      }
+      h1 {
+        color: #4caf50;
+        text-align: center;
+      }
+      .header {
+        background: url("https://example.com/header-image.jpg") no-repeat center
+          center;
+        background-size: cover;
+        padding: 20px;
+        color: white;
+        text-align: center;
+        border-radius: 8px;
+        margin-bottom: 20px;
+      }
+      button {
+        padding: 10px 15px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin: 5px;
+        font-size: 16px;
+      }
+      button:hover {
+        background-color: #45a049;
+      }
+      .hidden {
+        display: none;
+      }
+      form {
+        margin-top: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      input[type="text"],
+      input[type="file"] {
+        padding: 10px;
+        margin: 5px;
+        width: 80%;
+        max-width: 300px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+      .date-inputs {
+        display: flex;
+        justify-content: center;
+        margin: 5px 0;
+      }
+      .date-inputs input {
+        width: 60px;
+        margin: 0 5px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+      }
+      th {
+        background-color: #4caf50;
+        color: white;
+      }
+      #attendanceResult {
+        margin-top: 20px;
+        font-weight: bold;
+        color: #d9534f; /* Red color for alerts */
+      }
+      .notification {
+        margin-top: 20px;
+        color: #4caf50; /* Green color for success messages */
+        font-weight: bold;
+        text-align: center;
+      }
+      .nav-buttons {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+      }
+      .footer {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 12px;
+        color: #777;
+      }
+      img {
+        max-width: 100px;
+        margin: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>Quản Lý Học Sinh</h1>
+      <img src="https://example.com/logo.png" alt="Logo" />
+    </div>
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    types: [opened, synchronize, reopened, closed]
-    branches:
-      - main
+    <div id="mainButtons" class="nav-buttons">
+      <button onclick="showSection('studentInput')">
+        Nhập Thông Tin Học Sinh
+      </button>
+      <button onclick="showSection('studentManagement')">
+        Quản Lý Học Sinh
+      </button>
+      <button onclick="showSection('contactTeachers')">
+        Liên Hệ Giáo Viên
+      </button>
+    </div>
 
-jobs:
-  build_and_deploy_job:
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
-    runs-on: ubuntu-latest
-    name: Build and Deploy Job
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: true
-          lfs: false
-      - name: Build And Deploy
-        id: builddeploy
-        uses: Azure/static-web-apps-deploy@v1
-        with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_CALM_MOSS_066A55000 }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
-          action: "upload"
-          ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
-          # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
-          app_location: "/" # App source code path
-          api_location: "" # Api source code path - optional
-          output_location: "." # Built app content directory - optional
-          ###### End of Repository/Build Configurations ######
+    <div id="studentInput" class="hidden">
+      <h2>Nhập Thông Tin Học Sinh</h2>
+      <form id="studentForm">
+        <input type="text" id="name" placeholder="Tên Học Sinh" required />
+        <input type="text" id="class" placeholder="Lớp Học" required />
+        <button type="submit">Thêm Học Sinh</button>
+      </form>
+      <h2>Nhập Danh Sách Học Sinh Từ File</h2>
+      <input type="file" id="fileInput" accept=".txt" />
+      <button id="uploadButton">Tải Lên</button>
+      <div id="uploadNotification" class="notification hidden"></div>
+      <button onclick="showMain()">Quay Lại</button>
+    </div>
 
-  close_pull_request_job:
-    if: github.event_name == 'pull_request' && github.event.action == 'closed'
-    runs-on: ubuntu-latest
-    name: Close Pull Request Job
-    steps:
-      - name: Close Pull Request
-        id: closepullrequest
-        uses: Azure/static-web-apps-deploy@v1
-        with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_CALM_MOSS_066A55000 }}
-          action: "close"
+    <div id="studentManagement" class="hidden">
+      <h2>Quản Lý Học Sinh</h2>
+      <div class="nav-buttons">
+        <button onclick="showClass('Toán')">Toán</button>
+        <button onclick="showClass('Văn')">Văn</button>
+        <button onclick="showClass('Anh')">Anh</button>
+      </div>
+
+      <div id="classInfo" class="hidden">
+        <h3>Thông Tin Học Sinh Lớp: <span id="className"></span></h3>
+        <table id="classStudentTable">
+          <thead>
+            <tr>
+              <th>Mã Học Sinh</th>
+              <th>Tên</th>
+              <th>Lớp Học</th>
+              <th>Trạng Thái Điểm Danh</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <h2>Điểm Danh Học Sinh</h2>
+        <div class="date-inputs">
+          <input type="text" id="attendanceDay" placeholder="Ngày" required />
+          <input
+            type="text"
+            id="attendanceMonth"
+            placeholder="Tháng"
+            required
+          />
+          <input type="text" id="attendanceYear" placeholder="Năm" required />
+        </div>
+        <input
+          type="text"
+          id="studentIds"
+          placeholder="Mã Học Sinh (ngăn cách bằng dấu cách)"
+          required
+        />
+        <button id="attendanceButton">Điểm Danh</button>
+        <button onclick="showSection('studentManagement')">Quay Lại</button>
+        <div id="attendanceResult"></div>
+        <button id="searchAttendanceButton">Tìm Kiếm Điểm Danh</button>
+        <div id="searchSection" class="hidden">
+          <h3>Tìm Kiếm Theo Ngày</h3>
+          <div class="date-inputs">
+            <input type="text" id="searchDay" placeholder="Ngày" required />
+            <input type="text" id="searchMonth" placeholder="Tháng" required />
+            <input type="text" id="searchYear" placeholder="Năm" required />
+          </div>
+          <button id="performSearchButton">Tìm Kiếm</button>
+        </div>
+        <div id="searchResult"></div>
+      </div>
+    </div>
+
+    <div id="contactTeachers" class="hidden">
+      <h2>Liên Hệ Giáo Viên</h2>
+      <ul>
+        <li>
+          <strong>Giáo viên Toán</strong>: 0123 456 789 -
+          <a href="mailto:toan@example.com">toan@example.com</a>
+        </li>
+        <li>
+          <strong>Giáo viên Văn</strong>: 0987 654 321 -
+          <a href="mailto:van@example.com">van@example.com</a>
+        </li>
+        <li>
+          <strong>Giáo viên Anh</strong>: 0912 345 678 -
+          <a href="mailto:anh@example.com">anh@example.com</a>
+        </li>
+      </ul>
+      <button onclick="showMain()">Quay Lại</button>
+    </div>
+
+    <div class="footer">
+      &copy; 2024 Quản Lý Học Sinh. Tất cả các quyền được bảo lưu.
+    </div>
+
+    <script>
+      let studentIdCounter = 1;
+      const students = [];
+      const attendanceRecords = {};
+
+      function showMain() {
+        document.querySelectorAll("div").forEach((div) => {
+          div.classList.add("hidden");
+        });
+        document.getElementById("mainButtons").classList.remove("hidden");
+      }
+
+      function showSection(sectionId) {
+        document.querySelectorAll("div").forEach((div) => {
+          if (div.id !== sectionId && div.id !== "mainButtons") {
+            div.classList.add("hidden");
+          } else {
+            div.classList.remove("hidden");
+          }
+        });
+        document.getElementById("classInfo").classList.add("hidden");
+        document.getElementById("searchSection").classList.add("hidden");
+        if (sectionId === "studentManagement") {
+          displayStudentList();
+        }
+      }
+
+      document
+        .getElementById("studentForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          const name = document.getElementById("name").value;
+          const className = document.getElementById("class").value;
+
+          const student = {
+            id: studentIdCounter++,
+            name: name,
+            class: className,
+          };
+          students.push(student);
+
+          document.getElementById("name").value = "";
+          document.getElementById("class").value = "";
+          alert("Học sinh đã được thêm thành công!");
+        });
+
+      document
+        .getElementById("uploadButton")
+        .addEventListener("click", function () {
+          const fileInput = document.getElementById("fileInput");
+          const file = fileInput.files[0];
+
+          if (!file) {
+            alert("Vui lòng chọn một file để tải lên.");
+            return;
+          }
+
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            const content = e.target.result;
+            const lines = content.split("\n");
+
+            lines.forEach((line) => {
+              const [name, className] = line
+                .split(",")
+                .map((item) => item.trim());
+              if (name && className) {
+                const student = {
+                  id: studentIdCounter++,
+                  name: name,
+                  class: className,
+                };
+                students.push(student);
+              }
+            });
+            document.getElementById("uploadNotification").innerText =
+              "Tải lên thành công!";
+            document
+              .getElementById("uploadNotification")
+              .classList.remove("hidden");
+          };
+          reader.readAsText(file);
+        });
+
+      function displayStudentList() {
+        const classTable = document
+          .getElementById("classStudentTable")
+          .getElementsByTagName("tbody")[0];
+        classTable.innerHTML = ""; // Xóa nội dung cũ
+
+        students.forEach((student) => {
+          const row = classTable.insertRow();
+          row.insertCell(0).innerText = student.id;
+          row.insertCell(1).innerText = student.name;
+          row.insertCell(2).innerText = student.class;
+          row.insertCell(3).innerText = "Chưa điểm danh"; // Trạng thái mặc định
+        });
+      }
+
+      function showClass(className) {
+        document.getElementById("className").innerText = className;
+        document.getElementById("classInfo").classList.remove("hidden");
+        displayStudentList();
+      }
+
+      document
+        .getElementById("attendanceButton")
+        .addEventListener("click", function () {
+          const day = document.getElementById("attendanceDay").value;
+          const month = document.getElementById("attendanceMonth").value;
+          const year = document.getElementById("attendanceYear").value;
+          const dateKey = `${day}/${month}/${year}`;
+          const studentIds = document
+            .getElementById("studentIds")
+            .value.split(" ")
+            .map(Number);
+
+          // Lưu điểm danh
+          attendanceRecords[dateKey] = studentIds;
+
+          // Cập nhật trạng thái điểm danh
+          const classTable = document
+            .getElementById("classStudentTable")
+            .getElementsByTagName("tbody")[0];
+          classTable.innerHTML = ""; // Xóa nội dung cũ
+          students.forEach((student) => {
+            const row = classTable.insertRow();
+            row.insertCell(0).innerText = student.id;
+            row.insertCell(1).innerText = student.name;
+            row.insertCell(2).innerText = student.class;
+            row.insertCell(3).innerText = studentIds.includes(student.id)
+              ? "Đi học"
+              : "Vắng mặt";
+          });
+
+          document.getElementById("attendanceResult").innerText =
+            "Điểm danh thành công!";
+          document.getElementById("attendanceResult").style.color = "#4caf50"; // Xanh cho thông báo thành công
+        });
+
+      document
+        .getElementById("searchAttendanceButton")
+        .addEventListener("click", function () {
+          document.getElementById("searchSection").classList.toggle("hidden");
+        });
+
+      document
+        .getElementById("performSearchButton")
+        .addEventListener("click", function () {
+          const day = document.getElementById("searchDay").value;
+          const month = document.getElementById("searchMonth").value;
+          const year = document.getElementById("searchYear").value;
+          const dateKey = `${day}/${month}/${year}`;
+
+          // Kiểm tra xem có bản ghi điểm danh cho ngày đó không
+          const attendanceIds = attendanceRecords[dateKey] || [];
+
+          const studentsAttendance = students.map((student) => {
+            return {
+              id: student.id,
+              name: student.name,
+              class: student.class,
+              status: attendanceIds.includes(student.id)
+                ? "Đi học"
+                : "Vắng mặt",
+            };
+          });
+
+          const searchResult = document.getElementById("searchResult");
+          searchResult.innerHTML = `<h3>Kết quả                                                                                                                                                                                                          điểm danh cho ngày ${dateKey}:</h3>`;
+          const resultsTable = document.createElement("table");
+          const resultsHeader = `<tr><th>Mã Học Sinh</th><th>Tên</th><th>Lớp Học</th><th>Trạng Thái</th></tr>`;
+          resultsTable.innerHTML = resultsHeader;
+
+          studentsAttendance.forEach((student) => {
+            const row = `<tr><td>${student.id}</td><td>${student.name}</td><td>${student.class}</td><td>${student.status}</td></tr>`;
+            resultsTable.innerHTML += row;
+          });
+
+          searchResult.innerHTML = ""; // Xóa kết quả cũ
+          searchResult.appendChild(resultsTable);
+        });
+
+      showMain();
+    </script>
+  </body>
+</html>
